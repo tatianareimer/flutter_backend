@@ -30,4 +30,4 @@ def hello_world():
 @app.route("/alunos", methods=['GET'])
 def get_alunos():
     alunos = Aluno.query.all()
-    return make_response(jsonify({ [aluno.to_json() for aluno in alunos] }), 200)
+    return make_response(jsonify([aluno.to_json() for aluno in alunos] ), 200)
