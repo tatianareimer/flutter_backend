@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import jsonify
+from flask import jsonify, make_response
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:android2022!inf1300@localhost/cce_app"
@@ -30,4 +30,4 @@ def hello_world():
 @app.route("/alunos", methods=['GET'])
 def get_alunos():
     alunos = Aluno.query.all()
-    return jsonify({ 'alunos': [aluno.to_json() for aluno in alunos] })
+    return make_response(jsonify({ 'alunos': [aluno.to_json() for aluno in alunos] }), 200)
