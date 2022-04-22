@@ -77,6 +77,12 @@ class CursoProfessor(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     professor_id = db.Column(db.Integer, db.ForeignKey('professors.id'))
 
+class CursoAluno(db.Model):
+    __tablename__ = 'students_courses'
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
+
 # controllers
 
 @app.route("/")
@@ -93,3 +99,7 @@ def get_cursos_professor(professor_id):
     cursos = Curso.query.join(CursoProfessor).filter(CursoProfessor.professor_id == professor_id, CursoProfessor.course_id == Curso.id).all()
     return make_response(jsonify([curso.to_json() for curso in cursos]), 200)
 
+@app.route("/cursos/<int:course_id>/alunos", methods=['GET'])
+def get_curso_alunos(course_id):
+    alunos = Aluno.query.join(CursoAluno).filter(CursoAluno.course_id == course_id, CursoAluno.student_id == Aluno.id).all()
+    return make_response(jsonify([aluno.to_json() for aluno in alunos]), 200)
