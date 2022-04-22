@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import jsonify, make_response
 
 app = Flask(__name__)
-app. run(debug=True)
 #app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:android2022!inf1300@localhost/cce_app"
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://ysafvvroofbffc:95cd603cd3c46a9bb77a0561b4941707e60bad415d0ec5226f4aabc9c2adf3bb@ec2-34-194-158-176.compute-1.amazonaws.com:5432/d3najhi1ikpu7r"
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
