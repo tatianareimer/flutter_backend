@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
+from werkzeug.security import check_password_hash, generate_password_hash
+import re
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://ysafvvroofbffc:95cd603cd3c46a9bb77a0561b4941707e60bad415d0ec5226f4aabc9c2adf3bb@ec2-34-194-158-176.compute-1.amazonaws.com:5432/d3najhi1ikpu7r"
@@ -15,7 +17,6 @@ class Aluno(db.Model):
     email = db.Column(db.String(50), unique=True, nullable=False)
     cpf = db.Column(db.String(11), unique=True, nullable=False)
     fullname = db.Column(db.String(50), unique=True, nullable=False)
-    lastlogin = db.Column(db.String(50))
 
     def __repr__(self):
         return f'id: {str(self.id)}, email: {self.email}, cpf: {self.cpf}, fullname: {self.fullname}'
@@ -29,13 +30,24 @@ class Aluno(db.Model):
         }
         return json_aluno
 
+# Retorna o objeto Professor associado ao user_id (email ou cpf)
+'''
+@login_manager.user_loader
+def professor_loader(user_id):
+    if user_id is not None:
+        if re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'):
+            return Professor.query.get(email=user_id)
+        else:
+            return Professor.query.get(cpf=user_id)
+    return None
+'''  
 class Professor(db.Model):
     __tablename__ = 'professors'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, unique=True)
     email = db.Column(db.String(50), unique=True, nullable=False)
     cpf = db.Column(db.String(11), unique=True, nullable=False)
-    fullname = db.Column(db.String(50), unique=True, nullable=False)
-    lastlogin = db.Column(db.String(50))
+    fullname = db.Column(db.String(50), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
         return f'id: {str(self.id)}, email: {self.email}, cpf: {self.cpf}, fullname: {self.fullname}' 
@@ -43,8 +55,10 @@ class Professor(db.Model):
     def to_json(self):
         json_professor = {
             'id': self.id,
-            'username': self.username,
-            'fullname': self.fullname
+            'email': self.email,
+            'cpf': self.cpf,
+            'fullname': self.fullname,
+            'password': self.password
         }
         return json_professor
 
@@ -83,7 +97,7 @@ class CursoAluno(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
 
-# controllers
+# endpoints
 
 @app.route("/")
 def hello_world():
@@ -94,12 +108,32 @@ def get_alunos():
     alunos = Aluno.query.all()
     return make_response(jsonify([aluno.to_json() for aluno in alunos]), 200)
 
+# Get todos os cursos de um professor
 @app.route("/professores/<int:professor_id>/cursos", methods=['GET'])
 def get_cursos_professor(professor_id):
     cursos = Curso.query.join(CursoProfessor).filter(CursoProfessor.professor_id == professor_id, CursoProfessor.course_id == Curso.id).all()
     return make_response(jsonify([curso.to_json() for curso in cursos]), 200)
 
+# Get todos os alunos em um curso
 @app.route("/cursos/<int:course_id>/alunos", methods=['GET'])
 def get_curso_alunos(course_id):
     alunos = Aluno.query.join(CursoAluno).filter(CursoAluno.course_id == course_id, CursoAluno.student_id == Aluno.id).all()
     return make_response(jsonify([aluno.to_json() for aluno in alunos]), 200)
+
+@app.route("/login/professor", methods=['GET', 'POST'])
+def login_professor():
+    if request.method == 'POST':
+        username_entered = request.args.get('username')
+        password_entered = request.args.get('password')
+        i = generate_password_hash(password_entered)
+        print(i)
+        if re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", username_entered):
+            user = Professor.query.filter(Professor.email == username_entered).first()
+        else:
+            user = Professor.query.filter(Professor.cpf == username_entered).first()
+        if user is not None and check_password_hash(user.password, password_entered):
+            return jsonify({'signed_in': True})
+        return jsonify({'signed_in': False})
+
+
+        
