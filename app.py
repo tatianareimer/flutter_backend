@@ -125,8 +125,8 @@ def login_professor():
     if request.method == 'POST':
         username_entered = request.args.get('username')
         password_entered = request.args.get('password')
-        i = generate_password_hash(password_entered)
-        print(i)
+        #i = generate_password_hash(password_entered)
+        #print(i)
         if re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", username_entered):
             user = Professor.query.filter(Professor.email == username_entered).first()
         else:
