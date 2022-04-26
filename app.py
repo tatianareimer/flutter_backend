@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import re
 
 app = Flask(__name__)
-
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://ysafvvroofbffc:95cd603cd3c46a9bb77a0561b4941707e60bad415d0ec5226f4aabc9c2adf3bb@ec2-34-194-158-176.compute-1.amazonaws.com:5432/d3najhi1ikpu7r"
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
@@ -30,17 +30,6 @@ class Aluno(db.Model):
         }
         return json_aluno
 
-# Retorna o objeto Professor associado ao user_id (email ou cpf)
-'''
-@login_manager.user_loader
-def professor_loader(user_id):
-    if user_id is not None:
-        if re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'):
-            return Professor.query.get(email=user_id)
-        else:
-            return Professor.query.get(cpf=user_id)
-    return None
-'''  
 class Professor(db.Model):
     __tablename__ = 'professors'
     id = db.Column(db.Integer, primary_key=True, unique=True)
