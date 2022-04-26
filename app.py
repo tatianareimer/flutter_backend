@@ -57,8 +57,7 @@ class Professor(db.Model):
             'id': self.id,
             'email': self.email,
             'cpf': self.cpf,
-            'fullname': self.fullname,
-            'password': self.password
+            'fullname': self.fullname
         }
         return json_professor
 
@@ -132,8 +131,8 @@ def login_professor():
         else:
             user = Professor.query.filter(Professor.cpf == username_entered).first()
         if user is not None and check_password_hash(user.password, password_entered):
-            return jsonify({'signed_in': True})
-        return jsonify({'signed_in': False})
+            return make_response(jsonify(user.to_json()), 200)
+        return make_response(jsonify({'signed_in': False}),400)
 
 
         
