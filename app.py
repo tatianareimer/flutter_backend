@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import re
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = ""
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://ysafvvroofbffc:95cd603cd3c46a9bb77a0561b4941707e60bad415d0ec5226f4aabc9c2adf3bb@ec2-34-194-158-176.compute-1.amazonaws.com:5432/d3najhi1ikpu7r"
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
@@ -58,21 +58,17 @@ class Curso(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     classroom = db.Column(db.String(50))
-    begin = db.Column(db.Integer)
-    finish = db.Column(db.Integer)
-    days = db.Column(db.ARRAY(db.String))
+    schedule = db.Column(db.JSON)
 
     def __repr__(self):
-        return f'id: {str(self.id)}, name: {self.name}, classroom: {self.classroom}, begin: {str(self.begin)}, finish: {str(self.finish)}, days:{str(self.days)}'
+        return f'id: {str(self.id)}, name: {self.name}, classroom: {self.classroom}, schedule: {str(self.schedule)}'
 
     def to_json(self):
         json_curso = {
             'id': self.id,
             'name': self.name,
             'classroom': self.classroom,
-            'begin': self.begin,
-            'finish': self.finish,
-            'days': self.days
+            'schedule': self.schedule
         }
         return json_curso
 
@@ -135,7 +131,7 @@ def get_curso_alunos(course_id):
     alunos = Aluno.query.join(CursoAluno).filter(CursoAluno.course_id == course_id, CursoAluno.student_id == Aluno.id).all()
     return make_response(jsonify([aluno.to_json() for aluno in alunos]), 200)
 
-# Login do app
+# Login do app - professor
 @app.route("/login/professor", methods=['GET', 'POST'])
 def login_professor():
     if request.method == 'POST':
@@ -147,6 +143,23 @@ def login_professor():
             user = Professor.query.filter(Professor.email == username_entered).first()
         else:
             user = Professor.query.filter(Professor.cpf == username_entered).first()
+        if user is not None and check_password_hash(user.password, password_entered):
+            return make_response(jsonify(user.to_json()), 200)
+            #return make_response(jsonify({'signed_in': True}),200)
+        return make_response(jsonify({'signed_in': False}),400)
+
+# Login do app - aluno
+@app.route("/login/aluno", methods=['GET', 'POST'])
+def login_aluno():
+    if request.method == 'POST':
+        username_entered = request.args.get('username')
+        password_entered = request.args.get('password')
+        #i = generate_password_hash(password_entered)
+        #print(i)
+        if re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", username_entered):
+            user = Aluno.query.filter(Aluno.email == username_entered).first()
+        else:
+            user = Aluno.query.filter(Aluno.cpf == username_entered).first()
         if user is not None and check_password_hash(user.password, password_entered):
             return make_response(jsonify(user.to_json()), 200)
             #return make_response(jsonify({'signed_in': True}),200)
@@ -172,6 +185,8 @@ def post_attendance_aluno():
     except IntegrityError:
         db.session.rollback()
         return make_response(jsonify({'added': False}),400)
+
+
 
 
 
