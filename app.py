@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import re
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = ""
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://ysafvvroofbffc:95cd603cd3c46a9bb77a0561b4941707e60bad415d0ec5226f4aabc9c2adf3bb@ec2-34-194-158-176.compute-1.amazonaws.com:5432/d3najhi1ikpu7r"
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
@@ -179,7 +179,7 @@ def post_attendance_aluno():
         db.session.add(attendance)
         db.session.commit()
         if (attendance.id):   
-            return make_response(jsonify({'added': True}),200)
+            return make_response(jsonify({'added': True}),201)
         else:
             return make_response(jsonify({'added': False}),400)
     except IntegrityError:
