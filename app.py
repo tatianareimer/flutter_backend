@@ -181,7 +181,7 @@ def post_attendance_aluno():
         if (attendance.id):   
             return make_response(jsonify({'added': True}),201)
         else:
-            return make_response(jsonify({'added': False}),400)
+            return make_response(jsonify({'added': False}),201)
     except IntegrityError:
         db.session.rollback()
         return make_response(jsonify({'added': False}),400)
