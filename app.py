@@ -166,19 +166,23 @@ def login_aluno():
         return make_response(jsonify({'signed_in': False}),400)
 
 # Post aluno na lista de presença de uma matéria em um determinado dia 
-@app.route("/attendances/aluno", methods=['POST'])
+@app.route("/attendances/alunos", methods=['POST'])
 def post_attendance_aluno():
     data = request.get_json()
-    last_id = Presenca.query.order_by(Presenca.id.desc()).first()
-    if (last_id == None):
-        last_id = 1
-    else:
-        last_id = last_id.id + 1
+    added = 0
     try:
-        attendance = Presenca(id=last_id,present=data['present'], course_id=data['course_id'], student_id=data['student_id'], date=data['date'])
-        db.session.add(attendance)
-        db.session.commit()
-        if (attendance.id):   
+        for element in data:
+            last_id = Presenca.query.order_by(Presenca.id.desc()).first()
+            if (last_id == None):
+                last_id = 1
+            else:
+                last_id = last_id.id + 1
+            attendance = Presenca(id=last_id,present=element['present'], course_id=element['course_id'], student_id=element['student_id'], date=element['date'])
+            db.session.add(attendance)
+            db.session.commit()
+            if (attendance.id):  
+                added += 1 
+        if (added == len(data)):
             return make_response(jsonify({'added': True}),201)
         else:
             return make_response(jsonify({'added': False}),400)
