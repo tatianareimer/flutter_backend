@@ -144,7 +144,7 @@ def login_professor():
         else:
             user = Professor.query.filter(Professor.cpf == username_entered).first()
         if user is not None and check_password_hash(user.password, password_entered):
-            return make_response(jsonify(user.to_json()), 200)
+            return make_response(jsonify(user.to_json()), 201)
             #return make_response(jsonify({'signed_in': True}),200)
         return make_response(jsonify({'signed_in': False}),400)
 
@@ -161,7 +161,7 @@ def login_aluno():
         else:
             user = Aluno.query.filter(Aluno.cpf == username_entered).first()
         if user is not None and check_password_hash(user.password, password_entered):
-            return make_response(jsonify(user.to_json()), 200)
+            return make_response(jsonify(user.to_json()), 201)
             #return make_response(jsonify({'signed_in': True}),200)
         return make_response(jsonify({'signed_in': False}),400)
 
