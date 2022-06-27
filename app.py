@@ -198,7 +198,7 @@ def get_attendance_dates(course_id):
     return make_response(jsonify([date.to_json() for date in dates]), 200)
 
 # Get lista de alunos por presença em um dia
-@app.route("/alunos/presenca", methods=['GET'])
+@app.route("/alunos/presenca", methods=['POST'])
 def get_dates_students():
     data = request.get_json()
     date = data["data"]
@@ -206,7 +206,7 @@ def get_dates_students():
     result = db.session.query(Aluno, Presenca).with_entities(Aluno.fullname, Presenca.present).join(Presenca).filter(Presenca.date == date, Presenca.student_id == Aluno.id, Presenca.course_id == course).all()
     dictResult = [{'name': name, 'present': present} for name, present in result]
     alunos = Aluno.query.join(Presenca).filter(Presenca.date == date, Presenca.student_id == Aluno.id, Presenca.course_id == course).all()
-    return make_response(jsonify(dictResult), 200)
+    return make_response(jsonify(dictResult), 201)
 
 #generate hash for passwords
 @app.route("/generate", methods=['POST'])
