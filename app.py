@@ -8,6 +8,7 @@ import re
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://ysafvvroofbffc:95cd603cd3c46a9bb77a0561b4941707e60bad415d0ec5226f4aabc9c2adf3bb@ec2-34-194-158-176.compute-1.amazonaws.com:5432/d3najhi1ikpu7r"
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # models
@@ -195,6 +196,18 @@ def post_attendance_aluno():
 def get_attendance_dates(course_id):
     dates = Presenca.query.filter(Presenca.course_id == course_id).all()
     return make_response(jsonify([date.to_json() for date in dates]), 200)
+
+# Get lista de alunos por presença em um dia
+@app.route("/alunos/presenca", methods=['GET'])
+def get_dates_students():
+    data = request.get_json()
+    date = data["data"]
+    course = data["curso"]
+    result = db.session.query(Aluno, Presenca).with_entities(Aluno.fullname, Presenca.present).join(Presenca).filter(Presenca.date == date, Presenca.student_id == Aluno.id, Presenca.course_id == course).all()
+    dictResult = [{'name': name, 'present': present} for name, present in result]
+    print(dictResult)
+    alunos = Aluno.query.join(Presenca).filter(Presenca.date == date, Presenca.student_id == Aluno.id, Presenca.course_id == course).all()
+    return make_response(jsonify(dictResult), 200)
 
 #generate hash for passwords
 @app.route("/generate", methods=['POST'])
