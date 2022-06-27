@@ -190,6 +190,18 @@ def post_attendance_aluno():
         db.session.rollback()
         return make_response(jsonify({'added': False}),400)
 
+# Get lista de presença por disciplina
+@app.route("/curso/<int:course_id>/dates", methods=['GET'])
+def get_attendance_dates(course_id):
+    dates = Presenca.query.filter(Presenca.course_id == course_id).all()
+    return make_response(jsonify([date.to_json() for date in dates]), 200)
+
+#generate hash for passwords
+@app.route("/generate", methods=['POST'])
+def generate_hash():
+    pass_string = request.args.get('hash')
+    i = generate_password_hash(pass_string)
+    return make_response(jsonify({'hash': i}),201)
 
 
 
