@@ -205,7 +205,6 @@ def get_dates_students():
     course = data["curso"]
     result = db.session.query(Aluno, Presenca).with_entities(Aluno.fullname, Presenca.present).join(Presenca).filter(Presenca.date == date, Presenca.student_id == Aluno.id, Presenca.course_id == course).all()
     dictResult = [{'name': name, 'present': present} for name, present in result]
-    print(dictResult)
     alunos = Aluno.query.join(Presenca).filter(Presenca.date == date, Presenca.student_id == Aluno.id, Presenca.course_id == course).all()
     return make_response(jsonify(dictResult), 200)
 
